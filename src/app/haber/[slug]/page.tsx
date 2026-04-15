@@ -12,46 +12,51 @@ type NewsDetailPageProps = {
 };
 
 async function fetchArticleBySlug(slug: string): Promise<NewsItem | null> {
-  const article = await prisma.article.findUnique({
-    where: { slug },
-    include: {
-      category: {
-        select: {
-          name: true,
-          slug: true,
+  try {
+    const article = await prisma.article.findUnique({
+      where: { slug },
+      include: {
+        category: {
+          select: {
+            name: true,
+            slug: true,
+          },
+        },
+        author: {
+          select: {
+            name: true,
+            slug: true,
+          },
         },
       },
-      author: {
-        select: {
-          name: true,
-          slug: true,
-        },
-      },
-    },
-  });
+    });
 
-  if (!article || article.status !== "PUBLISHED") {
+    if (!article || article.status !== "PUBLISHED") {
+      return null;
+    }
+
+    const mapped = toArticleResponse(article);
+
+    return {
+      id: mapped.id,
+      slug: mapped.slug,
+      title: mapped.title,
+      summary: mapped.summary,
+      imageUrl: mapped.imageUrl,
+      content: mapped.content,
+      contentHtml: mapped.contentHtml,
+      category: mapped.category.name,
+      publishedAt: new Date(mapped.publishedAt).toLocaleDateString("tr-TR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
+      readTime: `${mapped.readTimeMin} dk`,
+    };
+  } catch (error) {
+    console.error(`Failed to fetch article by slug: ${slug}`, error);
     return null;
   }
-
-  const mapped = toArticleResponse(article);
-
-  return {
-    id: mapped.id,
-    slug: mapped.slug,
-    title: mapped.title,
-    summary: mapped.summary,
-    imageUrl: mapped.imageUrl,
-    content: mapped.content,
-    contentHtml: mapped.contentHtml,
-    category: mapped.category.name,
-    publishedAt: new Date(mapped.publishedAt).toLocaleDateString("tr-TR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    }),
-    readTime: `${mapped.readTimeMin} dk`,
-  };
 }
 
 export async function generateMetadata({

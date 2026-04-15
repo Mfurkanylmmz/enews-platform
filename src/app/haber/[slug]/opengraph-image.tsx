@@ -14,7 +14,12 @@ export const contentType = "image/png";
 
 export default async function OpenGraphImage({ params }: OpenGraphImageProps) {
   const { slug } = await params;
-  const article = await getNewsBySlug(slug);
+  let article = null;
+  try {
+    article = await getNewsBySlug(slug);
+  } catch (error) {
+    console.error(`Failed to fetch article for OG image: ${slug}`, error);
+  }
 
   const title = article?.title ?? "Haber Bulunamadı";
   const category = article?.category ?? "E-News";

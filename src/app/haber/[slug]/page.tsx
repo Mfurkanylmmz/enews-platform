@@ -4,52 +4,53 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { NewsItem } from "@/types/news";
+import { prisma } from "@/lib/prisma";
+import { toArticleResponse } from "@/lib/api/article-response";
 
 type NewsDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-
 async function fetchArticleBySlug(slug: string): Promise<NewsItem | null> {
-  const response = await fetch(`${API_BASE_URL}/api/articles/${slug}`, {
-    next: { revalidate: 60 },
+  const article = await prisma.article.findUnique({
+    where: { slug },
+    include: {
+      category: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
+      author: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
+    },
   });
 
-  if (!response.ok) {
+  if (!article || article.status !== "PUBLISHED") {
     return null;
   }
 
-  const payload = (await response.json()) as {
-    data: {
-      id: string;
-      slug: string;
-      title: string;
-      summary: string;
-      imageUrl: string;
-      content: string[];
-      contentHtml?: string;
-      publishedAt: string;
-      readTimeMin: number;
-      category: { name: string };
-    };
-  };
+  const mapped = toArticleResponse(article);
 
   return {
-    id: payload.data.id,
-    slug: payload.data.slug,
-    title: payload.data.title,
-    summary: payload.data.summary,
-    imageUrl: payload.data.imageUrl,
-    content: payload.data.content,
-    contentHtml: payload.data.contentHtml,
-    category: payload.data.category.name,
-    publishedAt: new Date(payload.data.publishedAt).toLocaleDateString("tr-TR", {
+    id: mapped.id,
+    slug: mapped.slug,
+    title: mapped.title,
+    summary: mapped.summary,
+    imageUrl: mapped.imageUrl,
+    content: mapped.content,
+    contentHtml: mapped.contentHtml,
+    category: mapped.category.name,
+    publishedAt: new Date(mapped.publishedAt).toLocaleDateString("tr-TR", {
       day: "2-digit",
       month: "long",
       year: "numeric",
     }),
-    readTime: `${payload.data.readTimeMin} dk`,
+    readTime: `${mapped.readTimeMin} dk`,
   };
 }
 

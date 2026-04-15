@@ -2,7 +2,10 @@ import type { MetadataRoute } from "next";
 import { getNewsSlugs } from "@/lib/server/news";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl) {
+    throw new Error("NEXT_PUBLIC_SITE_URL must be configured");
+  }
   const slugs = await getNewsSlugs();
 
   const staticRoutes: MetadataRoute.Sitemap = [

@@ -5,7 +5,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AppThemeProvider } from "@/components/providers/theme-provider";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+if (!siteUrl) {
+  throw new Error("NEXT_PUBLIC_SITE_URL must be configured");
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

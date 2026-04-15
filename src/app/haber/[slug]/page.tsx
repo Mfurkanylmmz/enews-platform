@@ -131,7 +131,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
         <article className="mt-6 overflow-hidden rounded-3xl bg-white/90 shadow-[0_10px_32px_rgba(30,64,175,0.1)] ring-1 ring-blue-100 dark:bg-white/3 dark:shadow-[0_10px_36px_rgba(15,23,42,0.35)] dark:ring-white/10">
           <div className="relative h-72 w-full md:h-96">
             <Image
-              src={article.imageUrl}
+              src={article.imageUrl || "https://via.placeholder.com/800x400?text=No+Image"}
               alt={article.title}
               fill
               className="object-cover"

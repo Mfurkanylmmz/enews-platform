@@ -3,7 +3,14 @@ import { getNewsSlugs } from "@/lib/server/news";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://e-news.example.com");
-  const slugs = await getNewsSlugs();
+  
+  let slugs: string[] = [];
+  try {
+    slugs = await getNewsSlugs();
+  } catch (error) {
+    console.error("Failed to fetch news slugs for sitemap:", error);
+    // Continue with empty slugs if database is unavailable
+  }
 
   const staticRoutes: MetadataRoute.Sitemap = [
     "",

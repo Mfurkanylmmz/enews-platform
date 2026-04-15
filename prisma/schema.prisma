@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  articles  Article[]
+}
+
+model Author {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  bio       String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  articles  Article[]
+}
+
+model Article {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  summary     String
+  coverImage  String
+  content     Json
+  publishedAt DateTime
+  readTimeMin Int
+  status      ArticleStatus @default(DRAFT)
+  isFeatured  Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  categoryId  String
+  authorId    String?
+  category    Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  author      Author?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([categoryId])
+  @@index([status, publishedAt(sort: Desc)])
+}
+
+model LeagueStanding {
+  id         String   @id @default(cuid())
+  leagueCode String   @default("superlig")
+  season     String
+  team       String
+  logoText   String
+  logoColor  String
+  played     Int
+  points     Int
+  rank       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([leagueCode, season, team])
+  @@index([leagueCode, season, rank])
+}
+
+model MatchResult {
+  id         String   @id @default(cuid())
+  leagueCode String   @default("superlig")
+  season     String
+  week       Int
+  homeTeam   String
+  awayTeam   String
+  homeScore  Int
+  awayScore  Int
+  playedAt   DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([leagueCode, season, week])
+}
+
+model Fixture {
+  id         String   @id @default(cuid())
+  leagueCode String   @default("superlig")
+  season     String
+  week       Int
+  homeTeam   String
+  awayTeam   String
+  matchDay   String
+  matchTime  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([leagueCode, season, week])
+}
+
+model AdSlotConfig {
+  id          String   @id @default(cuid())
+  slotKey     String   @unique
+  provider    String   @default("placeholder")
+  isActive    Boolean  @default(true)
+  placement   String
+  displayName String
+  settings    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}

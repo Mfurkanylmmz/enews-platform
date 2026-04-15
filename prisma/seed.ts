@@ -10,6 +10,7 @@ async function main() {
     { name: "Ekonomi", slug: "ekonomi" },
     { name: "Spor", slug: "spor" },
     { name: "Yaşam", slug: "yasam" },
+    { name: "Seyahat", slug: "seyahat" },
   ];
 
   for (const category of categories) {
